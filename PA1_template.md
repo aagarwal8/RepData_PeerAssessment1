@@ -7,7 +7,8 @@ output:
 
 
 ## Loading and preprocessing the data
-```{r globaloptions, warning=FALSE, message=FALSE}
+
+```r
 # setup global options
 library(knitr)
 opts_chunk$set(warning=FALSE, message=FALSE)
@@ -26,7 +27,8 @@ dt[, date:= ymd(date)]
   
   
 ## What is mean total number of steps taken per day?
-```{r}
+
+```r
 library(dplyr)
 
 # calculate total steps taken per day, excluding missing values
@@ -36,37 +38,48 @@ stepsPerDay <- dt[which(!is.na(steps)), ] %>%
 
 # histogram of the total number of steps taken each day
 hist(stepsPerDay$total, xlab = "Steps Per Day", main = "Total number of steps taken per day")
+```
 
+![](PA1_template_files/figure-html/unnamed-chunk-1-1.png)<!-- -->
+
+```r
 # mean & median of the total number of steps taken per day
 mean <- mean(stepsPerDay$total)
 median <- median(stepsPerDay$total)
 ```
-**Mean** of the total number of steps taken per day is **`r mean`**  
-**Median** of the total number of steps taken per day **`r median`**
+**Mean** of the total number of steps taken per day is **10766.1886792**  
+**Median** of the total number of steps taken per day **10765**
   
   
 ## What is the average daily activity pattern?
-```{r}
+
+```r
 # average number of steps per interval across all days
 avgStepsPerInterval <- dt[which(!is.na(steps)), ] %>%
                           group_by(interval) %>%
                           summarize(avg = mean(steps))
 
 plot(avgStepsPerInterval, type="l", ylab="Average # of Steps", main="Average Daily Activity Pattern")
+```
 
+![](PA1_template_files/figure-html/unnamed-chunk-2-1.png)<!-- -->
+
+```r
 maxStepInterval <- avgStepsPerInterval[which.max(avgStepsPerInterval$avg), 1]
 ```
-Interval **`r maxStepInterval`** contains the maximum number of steps on average across all the days in the dataset
+Interval **835** contains the maximum number of steps on average across all the days in the dataset
 
 
 
 ## Imputing missing values
-```{r}
+
+```r
 missingValuesCount <- sum(is.na(dt$steps))
 ```
-There are a total of **`r missingValuesCount`** missing values in the dataset
+There are a total of **2304** missing values in the dataset
 
-```{r}
+
+```r
 # replace missing values with the average of the steps for that interval
 dt2 <- dt %>% 
           group_by(interval) %>% 
@@ -80,17 +93,22 @@ stepsPerDay2 <- dt2[which(!is.na(steps)), ] %>%
 
 # histogram of the total number of steps taken each day
 hist(stepsPerDay2$total, xlab = "Steps Per Day", main = "Total number of steps taken per day (Imputed Data)")
+```
 
+![](PA1_template_files/figure-html/unnamed-chunk-4-1.png)<!-- -->
+
+```r
 # mean & median of the total number of steps taken per day
 mean2 <- mean(stepsPerDay2$total)
 median2 <- median(stepsPerDay2$total)
 ```
-**Mean** of the total number of steps taken per day for *imputed dataset* is **`r mean2`**, which is **`r ifelse(mean2 >= mean, 'greater than', (ifelse(mean2 == mean, 'the same as', 'less than')))`** the mean (`r mean`) of the original data.  
-**Median** of the total number of steps taken per day  for *imputed dataset* **`r median2`**, which is **`r ifelse(median2 >= median, 'greater than', (ifelse(median2 == median, 'the same as', 'less than')))`** the median (`r median`) of the original data.
+**Mean** of the total number of steps taken per day for *imputed dataset* is **10765.6393443**, which is **less than** the mean (10766.1886792) of the original data.  
+**Median** of the total number of steps taken per day  for *imputed dataset* **10762**, which is **less than** the median (10765) of the original data.
 
 
 ## Are there differences in activity patterns between weekdays and weekends?
-```{r}
+
+```r
 dt2[, day:=ifelse(wday(date) %in% c(1,7), "weekend", "weekday")]
 dt2[, day:=as.factor(day)]
 
@@ -101,3 +119,5 @@ avgByDayAndInterval <- dt2 %>%
 library(ggplot2)
 ggplot(data=avgByDayAndInterval, aes(interval, avg)) + geom_line() + facet_grid(day ~ .) + ylab("Number of Steps")
 ```
+
+![](PA1_template_files/figure-html/unnamed-chunk-5-1.png)<!-- -->
